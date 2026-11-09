@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="650" viewBox="0 0 1120 650" role="img" aria-label="CyberEye Build 1 prototype interface preview">
+<rect width="1120" height="650" fill="#f3f6fb"/>
+<rect width="1120" height="82" fill="#101d36"/>
+<text x="46" y="53" font-family="Arial,sans-serif" font-weight="bold" font-size="29" fill="#fff">Cyber<tspan fill="#57d8bc">Eye</tspan></text>
+<rect x="876" y="23" rx="16" width="198" height="32" fill="none" stroke="#6b7f9a"/>
+<text x="900" y="44" font-family="Arial,sans-serif" font-size="12" fill="#fff">BUILD 1 · INTERACTIVE DEMO</text>
+<text x="44" y="133" font-family="Arial,sans-serif" font-size="30" font-weight="bold" fill="#17243b">Spot suspicious messages before you click.</text>
+<text x="44" y="166" font-family="Arial,sans-serif" font-size="15" fill="#5c6c83">Paste a text, email, or chat message. CyberEye checks common scam indicators and explains what to verify next.</text>
+<rect x="44" y="192" width="500" height="400" rx="15" fill="#fff" stroke="#e0e7f1"/>
+<rect x="562" y="192" width="514" height="400" rx="15" fill="#fff" stroke="#e0e7f1"/>
+<text x="68" y="226" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#53677e">01 / INPUT</text>
+<text x="68" y="261" font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#17243b">Check a message</text>
+<text x="68" y="288" font-family="Arial,sans-serif" font-size="14" fill="#607088">Paste a suspicious message or try the sample.</text>
+<text x="68" y="326" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#53677e">MESSAGE TO REVIEW</text>
+<rect x="68" y="341" width="451" height="151" rx="9" fill="#fbfcff" stroke="#b9c9d9"/>
+<g font-family="Arial,sans-serif" font-size="14" fill="#17243b">
+<text x="82" y="368">Important: Your Airbnb reservation requires</text>
+<text x="82" y="392">immediate payment verification. Visit</text>
+<text x="82" y="416">https://verify-airbnb-stay.example to confirm</text>
+<text x="82" y="440">your credit card or your booking will</text>
+<text x="82" y="464">be cancelled.</text>
+</g>
+<rect x="68" y="513" width="451" height="51" rx="9" fill="#1359e6"/>
+<text x="237" y="545" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="#fff">Analyze message</text>
+<text x="588" y="226" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#53677e">02 / EXPLANATION</text>
+<text x="588" y="261" font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#17243b">Preliminary risk signals</text>
+<rect x="909" y="237" width="145" height="29" rx="15" fill="#ffe5e5"/>
+<text x="927" y="256" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#a32128">Multiple signals</text>
+<text x="588" y="287" font-family="Arial,sans-serif" font-size="13" fill="#607088">4 possible warning signs found. These are heuristics, not a verdict.</text>
+<rect x="588" y="304" width="463" height="50" rx="8" fill="#f7f9fc" stroke="#e8edf4"/>
+<text x="603" y="325" font-family="Arial,sans-serif" font-weight="bold" font-size="14" fill="#17243b">Pressure to act quickly</text>
+<text x="603" y="341" font-family="Arial,sans-serif" font-size="12" fill="#5a6980">Urgency and threatened cancellation.</text>
+<rect x="588" y="362" width="463" height="50" rx="8" fill="#f7f9fc" stroke="#e8edf4"/>
+<text x="603" y="383" font-family="Arial,sans-serif" font-weight="bold" font-size="14" fill="#17243b">Sensitive information requested</text>
+<text x="603" y="399" font-family="Arial,sans-serif" font-size="12" fill="#5a6980">Payment verification and credit card request.</text>
+<rect x="588" y="420" width="463" height="50" rx="8" fill="#f7f9fc" stroke="#e8edf4"/>
+<text x="603" y="441" font-family="Arial,sans-serif" font-weight="bold" font-size="14" fill="#17243b">Brand and linked domain may differ</text>
+<text x="603" y="457" font-family="Arial,sans-serif" font-size="12" fill="#5a6980">The URL does not appear to use airbnb.com.</text>
+<rect x="588" y="486" width="463" height="76" rx="8" fill="#ebfaf5"/>
+<rect x="588" y="486" width="4" height="76" rx="2" fill="#24ae88"/>
+<text x="603" y="507" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#17243b">Recommended next step</text>
+<text x="603" y="528" font-family="Arial,sans-serif" font-size="13" fill="#17243b">Open the official service directly to verify the</text>
+<text x="603" y="546" font-family="Arial,sans-serif" font-size="13" fill="#17243b">request instead of using the included link.</text>
+<text x="44" y="625" font-family="Arial,sans-serif" font-size="13" fill="#66788e">Build 1 interface preview · Rule-based demonstration only · Not a validated phishing detector</text>
+</svg>
