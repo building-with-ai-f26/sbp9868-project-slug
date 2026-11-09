@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CyberEye — Build 1 Prototype</title>
+  <style>
+    :root { color-scheme:light; font-family:Inter, -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#f3f6fb; color:#17243b; }
+    header { background:#101d36; color:#fff; padding:21px max(24px, calc((100vw - 1080px)/2)); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .brand { font-size:25px; font-weight:800; letter-spacing:-.7px; }
+    .brand span { color:#57d8bc; }
+    .flag { border:1px solid #5e728f; padding:6px 10px; border-radius:16px; font-size:11px; letter-spacing:.4px; }
+    main { max-width:1080px; margin:32px auto; padding:0 22px 40px; }
+    h1 { font-size:29px; letter-spacing:-.7px; margin:0 0 8px; }
+    .intro { color:#5c6c83; margin:0 0 24px; line-height:1.6; }
+    .panels { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .panel { background:white; border:1px solid #e0e7f1; border-radius:15px; padding:23px; box-shadow:0 7px 22px rgba(18,35,62,.04); }
+    .step { font-size:11px; font-weight:800; color:#53677e; text-transform:uppercase; letter-spacing:1px; }
+    h2 { margin:7px 0 10px; font-size:19px; }
+    .hint { font-size:13px; color:#607088; line-height:1.5; margin:0 0 13px; }
+    textarea { font:14px/1.65 inherit; font-family:inherit; padding:14px; width:100%; min-height:184px; resize:vertical; border:1px solid #b9c9d9; border-radius:10px; color:#17243b; background:#fbfcff; }
+    textarea:focus { outline:2px solid #58a8ff; border-color:transparent; }
+    button { cursor:pointer; background:#1359e6; color:white; border:0; border-radius:9px; font-weight:700; font-size:14px; padding:13px 18px; margin-top:14px; width:100%; }
+    button:hover { background:#0d48bc; }
+    .result-head { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .risk { border-radius:20px; font-size:12px; padding:7px 12px; font-weight:800; background:#fff1e7; color:#9a4400; }
+    .risk.low { background:#e5f5ee; color:#186c45; }
+    .risk.medium { background:#fff7db; color:#855b0a; }
+    .risk.high { background:#ffe5e5; color:#a32128; }
+    .finding { background:#f7f9fc; padding:12px; border-radius:9px; border:1px solid #e8edf4; margin:9px 0; font-size:14px; line-height:1.45; }
+    .finding strong { display:block; margin-bottom:3px; }
+    .finding span { color:#5a6980; font-size:13px; }
+    .safe { margin-top:18px; border-left:3px solid #24ae88; padding:10px 13px; background:#ebfaf5; border-radius:0 8px 8px 0; font-size:13px; line-height:1.5; }
+    .foot { font-size:12px; color:#6d7e95; margin:23px 0 0; line-height:1.55; }
+    @media(max-width:750px) { .panels{grid-template-columns:1fr;} main{margin-top:20px;} header{padding:16px 22px;} .flag{font-size:10px;} }
+  </style>
+</head>
+<body>
+  <header><div class="brand">Cyber<span>Eye</span></div><div class="flag">BUILD 1 · INTERACTIVE DEMO</div></header>
+  <main>
+    <h1>Spot suspicious messages before you click.</h1>
+    <p class="intro">Paste a text, email, or chat message. CyberEye checks for common scam indicators and explains what to verify next.</p>
+    <div class="panels">
+      <section class="panel">
+        <div class="step">01 / Input</div><h2>Check a message</h2>
+        <p class="hint">Use a sample message or paste your own. This demo never opens links or sends message content to a server.</p>
+        <label for="message" class="step">Message to review</label>
+        <textarea id="message" spellcheck="false">Important: Your Airbnb reservation requires immediate payment verification. Visit https://verify-airbnb-stay.example to confirm your credit card or your booking will be cancelled.</textarea>
+        <button id="analyze">Analyze message</button>
+      </section>
+      <section class="panel" aria-live="polite">
+        <div class="step">02 / Explanation</div>
+        <div class="result-head"><h2>Preliminary risk signals</h2><span class="risk" id="risk">Analyzing</span></div>
+        <p class="hint" id="summary">This is a preliminary indicator check, not proof that a message is fraudulent.</p>
+        <div id="findings"></div>
+        <div class="safe"><strong>Recommended next step:</strong> <span id="advice">Verify requests inside the official app or website you open yourself, rather than using message links.</span></div>
+      </section>
+    </div>
+    <p class="foot">Build 1 proof of concept. This browser-only version uses simple rule-based checks, not an AI model, link sandbox, malicious-URL reputation feed, or automated messaging access. A low score does not mean a message is safe.</p>
+  </main>
+  <script>
+    const $=id=>document.getElementById(id);
+    function analyze() {
+      const value=$('message').value.trim();
+      const tests=[
+        [/urgent|immediate|right away|today|within \d+ hours|cancelled|suspend|expire/i,'Pressure to act quickly','The message uses urgency or a threatened consequence.'],
+        [/credit card|payment|bank|billing|password|verification|verify your|confirm your/i,'Sensitive information requested','The sender asks for a payment, account verification, or credentials.'],
+        [/https?:\/\/[^\s]+/i,'Link included','Check the destination independently; a link alone does not establish malicious intent.']
+      ];
+      const results=tests.filter(t=>t[0].test(value));
+      if (/airbnb/i.test(value)&&/https?:\/\/[^\s]*airbnb\.com(\/|[?#\s]|$)/i.test(value)===false&&/https?:\/\//i.test(value)) {
+        results.push([null,'Brand and linked domain may differ','The message mentions Airbnb, but its URL does not appear to use airbnb.com.']);
+      }
+      const score=results.length;
+      const level=score>=3?'high':score>=1?'medium':'low';
+      $('risk').textContent=level==='high'?'Multiple signals':level==='medium'?'Review recommended':'No obvious signals';
+      $('risk').className='risk '+level;
+      $('summary').textContent=!value?'Enter a message to review.':score?score+' possible warning sign'+(score>1?'s':'')+' found. These are heuristics, not a verdict.':'No matching indicators found. That does not confirm the message is safe.';
+      $('findings').replaceChildren();
+      if(!results.length) {
+        const e=document.createElement('div');e.className='finding';e.textContent='No common warning phrases identified in this sample.';$('findings').appendChild(e);
+      } else results.forEach(x=>{const d=document.createElement('div');d.className='finding';const t=document.createElement('strong');t.textContent=x[1];const s=document.createElement('span');s.textContent=x[2];d.append(t,s);$('findings').appendChild(d);});
+      $('advice').textContent=score?'Do not use the included link. Open the official service directly and check your account for an authentic request.':'Check the sender and independently verify unexpected requests before acting.';
+    }
+    $('analyze').addEventListener('click',analyze);
+    analyze();
+  </script>
+</body>
+</html>
