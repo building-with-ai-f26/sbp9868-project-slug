@@ -145,7 +145,7 @@
     <header>
       <span class="eyebrow">NYU Stern · Building with AI · Fall 2026</span>
       <h1>CyberEye</h1>
-      <p class="tagline">A personal cybersecurity tool to analyze suspicious messages/links in a sandboxed environment, to help users avoid personal scams.</p>
+      <p class="tagline">A personal cybersecurity assistant that helps people spot warning signs in suspicious messages and links before they act.</p>
       <div class="cta-row">
         <a class="btn" href="#live-demo" onclick="window.posthog && posthog.capture('clicked_try_product')">See the Product →</a>
         <a class="btn btn-secondary" href="#prd">Read the Living PRD</a>
@@ -171,44 +171,50 @@
     <!-- LIVING PRD (Updated every week!) -->
     <section id="prd">
       <h2>Living PRD (Product Requirements Document)</h2>
-      <p class="meta">Updated every week as we test with real users and learn what works.</p>
+      <p class="meta">Draft v1 for Build 1 — November 8, 2026. Review and personalize before submission; this will change as CyberEye is tested with users.</p>
 
-      <h3>1. Target User & The Job to Be Done</h3>
-      <p><strong>Who is this for?</strong> [Name a specific, reachable person or role you have direct access to.]</p>
-      <p><strong>The painful "Before" workflow:</strong> [How do they do this today, and why is it slow, manual, or broken?]</p>
-      <p><strong>The "After" workflow with this product:</strong> [What does your tool do for them in one sitting?]</p>
+      <h3>1. Target User &amp; The Job to Be Done</h3>
+      <p><strong>Who is this for?</strong> Initially, friends and NYU Stern classmates who make travel reservations or receive unexpected account, delivery, or payment messages. This is a group I can reach directly to test the workflow. <strong>[Before submitting: identify one specific friend or classmate willing to test CyberEye.]</strong></p>
+      <p><strong>Problem:</strong> Scam messages increasingly resemble legitimate communications from familiar services. Someone may receive a message that refers to a real booking or account and directs them to a convincing-looking verification or payment page. The user has to decide quickly whether the request is authentic, often without knowing which signals to look for.</p>
+      <p><strong>The painful "Before" workflow:</strong> A user receives a questionable text, email, or WhatsApp message, searches for the sender or domain, compares it with the official service, and tries to decide whether to open the link. This can be time-consuming and easy to get wrong, especially when the message creates urgency.</p>
+      <p><strong>The "After" workflow with CyberEye:</strong> Instead of clicking the link, the user copies the message into CyberEye. The tool highlights suspicious language or domain patterns, explains why the signs matter, and suggests a safer way to verify the request through the official service. Its purpose is to support the user's decision, not guarantee a message is safe or malicious.</p>
 
-      <h3>2. Scope & Explicit Non-Goals</h3>
+      <h3>2. Scope &amp; Explicit Non-Goals</h3>
       <ul>
-        <li><strong>In Scope (Core Workflow):</strong> [The 1 main workflow this product does reliably]</li>
-        <li><strong>Out of Scope #1:</strong> [Feature you are deliberately NOT building in 6 weeks]</li>
-        <li><strong>Out of Scope #2:</strong> [Feature you are deliberately NOT building in 6 weeks]</li>
-        <li><strong>Out of Scope #3:</strong> [Feature you are deliberately NOT building in 6 weeks]</li>
+        <li><strong>Core workflow:</strong> Paste a suspicious message, analyze it, and receive a clear explanation of risk indicators and a recommended next step.</li>
+        <li><strong>Build 1 implementation:</strong> A browser-based prototype with simple rule-based checks for urgency, requests for sensitive information, links, and some brand/domain mismatches.</li>
+        <li><strong>Planned improvements:</strong> Evaluate whether an AI model and safer URL/domain metadata checks make the explanations more useful without increasing false confidence.</li>
+        <li><strong>Out of Scope #1:</strong> Automatic reading or monitoring of iMessage, WhatsApp, or private inboxes.</li>
+        <li><strong>Out of Scope #2:</strong> Opening suspicious links or running them in a live detonation/sandbox environment during this six-week project.</li>
+        <li><strong>Out of Scope #3:</strong> Automatically blocking or quarantining messages, or promising definitive scam detection.</li>
       </ul>
 
-      <h3>3. How It Works Under the Hood & Riskiest Assumption (Week 2+)</h3>
-      <p><strong>Riskiest Assumption:</strong> [What is the #1 technical or user risk that could sink this product?]</p>
-      <p><strong>Simple Architecture:</strong> [User Input] → [Your App / Server] → [AI Model / Tool] → [Output]</p>
+      <h3>3. How It Works Under the Hood &amp; Riskiest Assumption (Week 2+)</h3>
+      <p><strong>Riskiest assumption:</strong> People will find an explainable risk assessment useful enough to check a suspicious message before clicking, and the tool can provide that assessment without misleading users when signs are incomplete or benign.</p>
+      <p><strong>Current architecture:</strong> Pasted message → browser-side JavaScript rules → list of indicators + suggested verification step. The Build 1 prototype does not send data to an AI model, contact external URLs, or sandbox links.</p>
+      <p><strong>Potential next version:</strong> Pasted message → structured risk analysis using an AI model and carefully selected URL/domain signals → concise explanation with uncertainty and safe next steps. Any external lookups would need privacy and security safeguards.</p>
+      <p><strong>Early success criteria (to validate):</strong> A user can understand the output without cybersecurity expertise, finish a review in one sitting, and identify the independent verification step. Track false alarms and missed red flags rather than relying on a single "safe" score.</p>
 
-      <h3>4. Unit Economics & Analytics Snapshot (Updated Weekly)</h3>
+      <h3>4. Unit Economics &amp; Analytics Snapshot (Updated Weekly)</h3>
       <div class="grid-2">
         <div class="stat-box">
           <div class="stat-label">Cumulative Build Spend</div>
-          <div class="stat-value">[Record actual spend]</div>
+          <div class="stat-value">[Enter actual spend]</div>
         </div>
         <div class="stat-box">
-          <div class="stat-label">Est. Cost Per User Run</div>
-          <div class="stat-value">[Not yet estimated]</div>
+          <div class="stat-label">Current Cost Per Prototype Run</div>
+          <div class="stat-value">$0 in API calls</div>
         </div>
         <div class="stat-box">
           <div class="stat-label">User Evidence (Analytics from Build 2)</div>
-          <div class="stat-value">[Not yet measured]</div>
+          <div class="stat-value">Not yet measured</div>
         </div>
         <div class="stat-box">
           <div class="stat-label">Sponsor Call (Week 6)</div>
           <div class="stat-value">TBD</div>
         </div>
       </div>
+      <p class="meta">Build 1 cost per run is zero in external API usage because the prototype only runs local browser rules. Any coding-agent subscriptions, token expenses, and time spent should be reported using actual records.</p>
     </section>
 
     <!-- WEEKLY BUILD LOG (Updated at least twice a week via Git commits) -->
@@ -217,12 +223,16 @@
       <p class="meta">Build on at least two separate days each week outside class, including the November 3 break. Push commits and log actual progress, failures, PRD changes, costs, and hours here. All build deadlines are noon, New York time.</p>
 
       <div class="log-entry">
-        <h3>Build 1 · Intent.md & Throwaway Prototype (Due Nov 9)</h3>
+        <h3>Build 1 · Intent.md &amp; Throwaway Prototype (Due Nov 9)</h3>
+        <p class="meta"><strong>Draft log — verify your learning activities, time, costs, and testing before submission.</strong></p>
         <ul>
-          <li><strong>What shipped:</strong> [What you actually built; link your local prototype screenshot or GIF above.]</li>
-          <li><strong>Things learned with AI:</strong> [What you learned from AI practice and Terminus Episodes 1 and 2.]</li>
-          <li><strong>What broke / changed in PRD:</strong> [Fill in]</li>
-          <li><strong>Cost & time this week:</strong> $[0.00] · [0] hours</li>
+          <li><strong>What shipped:</strong> Created a public CyberEye product page and a working, browser-based <a href="./prototype.html" target="_blank" rel="noopener noreferrer">message-analysis demo</a>. Users can paste a message, see warning signs such as urgency or sensitive-data requests, and read practical verification advice. Added an illustrative preview to the Product Showcase. A real browser screenshot is still <strong>[to be captured and uploaded]</strong>.</li>
+          <li><strong>How I used AI:</strong> Used ChatGPT to work through the GitHub project setup, narrow the MVP, and help write the prototype and product-page content. <strong>[Confirm any other coding agents or models personally used.]</strong></li>
+          <li><strong>Things learned with AI:</strong> GitHub stores the source files while GitHub Pages publishes the static website; the public PRD and working prototype can be separate HTML pages. I also learned why a small, testable workflow is a more useful starting point than trying to build an automated scam-detection platform immediately. <strong>[Personalize with your own takeaways and Terminus Episodes 1–2 learning after completing them.]</strong></li>
+          <li><strong>What broke / changed in PRD:</strong> The initial concept included automatic messaging-app integration and sandboxing suspicious links, but neither is implemented in Build 1. I narrowed the first version to manual copy-and-paste analysis and clarified that current checks are rule-based, not AI-powered. <strong>[Add any actual bugs or troubleshooting encountered; none have been documented here.]</strong></li>
+          <li><strong>Testing &amp; feedback:</strong> The prototype includes a sample booking-payment scam message. <strong>[Before submitting: test at least one benign and one suspicious example, note the results, and record any real tester feedback.]</strong></li>
+          <li><strong>Cost &amp; time this week:</strong> Browser prototype: no paid inference/API calls. Coding-agent or subscription spend: <strong>[actual $ amount]</strong>. Other costs: <strong>[actual $ amount]</strong>. Your work time: <strong>[actual hours]</strong>.</li>
+          <li><strong>Course practice:</strong> Terminus Episodes 1 and 2: <strong>[mark completed only if done; add a brief concrete lesson from each]</strong>. PostHog account: <strong>[confirm created / still to do]</strong>. Pod feedback: <strong>[name and feedback if available; otherwise state not yet collected]</strong>.</li>
         </ul>
       </div>
 
