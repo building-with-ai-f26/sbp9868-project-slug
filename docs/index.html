@@ -175,12 +175,13 @@
         <strong>Current Status:</strong> Build 2: AI-powered analysis working locally with a real OpenRouter call. The public GitHub Pages demo remains a static preview; to run the AI workflow, launch <code>python3 server.py</code> locally.<br />
         <strong>Preview:</strong> <a href="./prototype.html" target="_blank" rel="noopener noreferrer">Open the CyberEye interface</a> &nbsp;·&nbsp; <strong>Run instructions:</strong> <a href="https://github.com/building-with-ai-f26/sbp9868-project-slug#local-setup-build-2-ai-backend" target="_blank" rel="noopener noreferrer">GitHub README</a>
       </p>
-      <a href="./prototype.html" target="_blank" rel="noopener noreferrer" aria-label="Open the interactive CyberEye prototype">
-        <img src="./images/cybereye-prototype-preview.svg" alt="CyberEye Build 1 prototype interface preview showing a sample suspicious booking message and its risk indicators" style="display:block;width:100%;height:auto;border:1px solid #e5e7eb;border-radius:10px;margin:16px 0 10px;" />
-      </a>
-      <p class="meta">
-        Build 1 illustrative interface preview (not a screenshot of the live AI response). Build 2 separately runs a real AI request through a local Python backend. A successful local test classified a synthetic-style booking-suspension message as elevated risk, returned four explanations, and displayed model usage. Screenshots for public submission should omit actual names, booking details, and private messages.
-      </p>
+      <figure style="margin:20px 0 12px">
+        <a href="./images/cybereye-build2-screenshot-redacted.webp" target="_blank" rel="noopener noreferrer" aria-label="View the full CyberEye Build 2 AI analysis screenshot">
+          <img src="./images/cybereye-build2-screenshot-redacted.webp" alt="Real Build 2 CyberEye AI analysis, showing elevated risk and four explanatory indicators; booking message and URL details redacted" style="display:block;width:100%;height:auto;border:1px solid #e5e7eb;border-radius:10px;" />
+        </a>
+        <figcaption class="meta" style="margin-top:8px">Build 2 evidence — actual successful local OpenRouter response, November 15, 2026. Booking-message and URL details redacted before public posting. The model produced four findings and classified the message as elevated risk; one finding about a generic greeting was inaccurate, illustrating why CyberEye must be tested for false positives.</figcaption>
+      </figure>
+      <p class="meta">The linked public <a href="./prototype.html" target="_blank" rel="noopener noreferrer">interface preview</a> is static. Live AI analysis runs locally by launching <code>python3 server.py</code>. PostHog pageviews, clicks, and session replay were verified on both the public Product Page and local application.</p>
     </section>
 
     <!-- LIVING PRD (Updated every week!) -->
@@ -263,7 +264,7 @@
           <li><strong>Problems and fixes:</strong> Encountered a stray duplicate JavaScript block, a broken cost-display string that prevented clicks, free-model latency, Python HTTPS certificate verification failure, and empty or badly formatted model responses. Fixed the markup/JavaScript, installed Python certificates locally, expanded the output budget, and improved JSON parsing and error reporting. Automated tests now pass.</li>
           <li><strong>Lesson / PRD change:</strong> A real model call proves the workflow can run, but not that results are accurate. One response incorrectly labeled a personalized greeting as generic. Build 3 should prioritize realistic benign and malicious examples, unsupported-claim checks, and more transparent uncertainty. No inbox integrations, URL detonation, or automatic blocking are included.</li>
           <li><strong>Cost &amp; time:</strong> Confirmed successful free-model inference: <strong>$0.000000 for 1,610 tokens</strong>. Public GitHub Pages / locally run server: no separately billed hosting for this build. <strong>Actual hours: 2 hours (Build 2)</strong>. <strong>Other agent/subscription expenditure and cumulative cost: [confirm actual amount]</strong>.</li>
-          <li><strong>Evidence remaining:</strong> Add a redacted screenshot of the actual AI result to the Product Showcase (not the illustrative Build 1 preview), and capture the requested PostHog events screenshot for Icerynk. A separate meaningful commit on November 16 is still required to meet the two-day rule for this build.</li>
+          <li><strong>Evidence remaining:</strong> The redacted real AI screenshot is embedded in the Product Showcase; capture the requested PostHog events screenshot for Icerynk. A separate meaningful commit on November 16 is still required to meet the two-day rule for this build.</li>
         </ul>
       </div>
 
