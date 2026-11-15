@@ -33,7 +33,7 @@ message may be legitimate. Avoid definitive "safe"/"malicious" verdicts.
 Use risk_level=unclear where evidence is insufficient. Mention uncertainty.
 Provide a practical independent verification step: open the service's official
 app/site yourself or contact the organization through a known channel.
-Return ONLY the required structured JSON. Do not quote or render live links."""
+Return ONLY a single JSON object with risk_level, summary, indicators (each with title and explanation), and next_step. List at most 4 concise indicators. Do not use Markdown fences. Do not quote or render live links."""
 
 RISK_SCHEMA = {
     "type": "object",
@@ -91,22 +91,69 @@ def validate_message(message):
 
 
 def parse_model_response(data):
+    """Validate model output before making any safety-related claims to the user.
+
+    Do not log prompt text, raw model responses, or links in error messages.
+    Free providers may wrap otherwise valid JSON in a Markdown code fence.
+    """
     try:
-        content = data["choices"][0]["message"]["content"]
-        if not isinstance(content, str):
-            raise ValueError("Expected text response")
-        result = json.loads(content)
-        if (result.get("risk_level") not in {"high", "medium", "low", "unclear"}
+        if not isinstance(data, dict) or not data.get("choices"):
+            raise AnalysisError(502, "OpenRouter returned no model choices. Try again.")
+        choice = data["choices"][0]
+        if not isinstance(choice, dict):
+            raise AnalysisError(502, "OpenRouter returned an unexpected choice format.")
+        finish_reason = choice.get("finish_reason")
+        if finish_reason == "length":
+            raise AnalysisError(
+                502,
+                "The free model ran out of output tokens before finishing the assessment. "
+                "Try a shorter message or choose another free model."
+            )
+        if finish_reason in ("content_filter", "error"):
+            raise AnalysisError(502, "The model could not finish the assessment. Try another example.")
+        model_message = choice.get("message") or {}
+        content = model_message.get("content") if isinstance(model_message, dict) else None
+        if isinstance(content, list):
+            # Some OpenAI-compatible providers return text as content parts.
+            content = "".join(
+                part.get("text", "") for part in content
+                if isinstance(part, dict) and part.get("type") == "text"
+            )
+        if not isinstance(content, str) or not content.strip():
+            raise AnalysisError(
+                502,
+                "The free model returned an empty response. It may have used its output "
+                "budget for reasoning. Try again or select a different free model."
+            )
+        content = content.strip()
+        if content.startswith("```"):
+            lines = content.splitlines()
+            if len(lines) >= 3 and lines[0].strip().lower() in ("```json", "```") and lines[-1].strip() == "```":
+                content = "\n".join(lines[1:-1]).strip()
+        try:
+            result = json.loads(content)
+        except ValueError:
+            raise AnalysisError(
+                502,
+                "The free model returned text that is not valid JSON. "
+                "Try again; free models vary in structured-output support."
+            )
+        if (not isinstance(result, dict)
+                or result.get("risk_level") not in {"high", "medium", "low", "unclear"}
                 or not all(isinstance(result.get(k), str) and result[k].strip()
                            for k in ("summary", "next_step"))
                 or not isinstance(result.get("indicators"), list)
                 or len(result["indicators"]) > 8
                 or any(not isinstance(item, dict)
-                       or not isinstance(item.get("title"), str)
-                       or not isinstance(item.get("explanation"), str)
+                       or not isinstance(item.get("title"), str) or not item["title"].strip()
+                       or not isinstance(item.get("explanation"), str) or not item["explanation"].strip()
                        for item in result["indicators"])):
-            raise ValueError("Unexpected structure")
-        usage = data.get("usage") or {}
+            raise AnalysisError(
+                502,
+                "The model returned JSON with missing or invalid risk-assessment fields. "
+                "Try again or use a different free model."
+            )
+        usage = data.get("usage") if isinstance(data.get("usage"), dict) else {}
         return {
             "risk_level": result["risk_level"],
             "summary": result["summary"][:1200],
@@ -122,9 +169,10 @@ def parse_model_response(data):
                 "cost_usd": usage.get("cost")
             }
         }
-    except (KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError):
-        raise AnalysisError(502, "AI response could not be interpreted. Please retry.")
-
+    except AnalysisError:
+        raise
+    except (KeyError, IndexError, TypeError):
+        raise AnalysisError(502, "OpenRouter returned an unexpected response structure. Try again.")
 
 def classify_connection_error(reason):
     """Give actionable, non-sensitive network errors without exposing API keys."""
@@ -181,7 +229,7 @@ def analyze_message(message):
         },
         "provider": {"require_parameters": True},
         "temperature": 0.1,
-        "max_completion_tokens": 550
+        "max_completion_tokens": 1800
     }
     req = request.Request(
         OPENROUTER_URL,
