@@ -172,21 +172,21 @@
     <section id="live-demo">
       <h2>Product Showcase (Prototype / Live App / 2-Min Video)</h2>
       <p>
-        <strong>Current Status:</strong> Build 1: interactive browser prototype (rule-based demonstration, not yet AI-powered)<br />
-        <strong>Demo:</strong> <a href="./prototype.html" target="_blank" rel="noopener noreferrer">Try the CyberEye prototype</a>
+        <strong>Current Status:</strong> Build 2: AI-powered analysis working locally with a real OpenRouter call. The public GitHub Pages demo remains a static preview; to run the AI workflow, launch <code>python3 server.py</code> locally.<br />
+        <strong>Preview:</strong> <a href="./prototype.html" target="_blank" rel="noopener noreferrer">Open the CyberEye interface</a> &nbsp;·&nbsp; <strong>Run instructions:</strong> <a href="https://github.com/building-with-ai-f26/sbp9868-project-slug#local-setup-build-2-ai-backend" target="_blank" rel="noopener noreferrer">GitHub README</a>
       </p>
       <a href="./prototype.html" target="_blank" rel="noopener noreferrer" aria-label="Open the interactive CyberEye prototype">
         <img src="./images/cybereye-prototype-preview.svg" alt="CyberEye Build 1 prototype interface preview showing a sample suspicious booking message and its risk indicators" style="display:block;width:100%;height:auto;border:1px solid #e5e7eb;border-radius:10px;margin:16px 0 10px;" />
       </a>
       <p class="meta">
-        Preview of the working Build 1 interface (illustrative rendering, not a captured screenshot). The linked prototype runs in the browser and flags urgency, sensitive-information requests, and suspicious-looking links using transparent rules. It does not sandbox links, connect to messaging apps, or run an AI model yet. 
+        Build 1 illustrative interface preview (not a screenshot of the live AI response). Build 2 separately runs a real AI request through a local Python backend. A successful local test classified a synthetic-style booking-suspension message as elevated risk, returned four explanations, and displayed model usage. Screenshots for public submission should omit actual names, booking details, and private messages.
       </p>
     </section>
 
     <!-- LIVING PRD (Updated every week!) -->
     <section id="prd">
       <h2>Living PRD (Product Requirements Document)</h2>
-      <p class="meta">Draft v1 for Build 1 — November 8, 2026. Review and personalize before submission; this will change as CyberEye is tested with users.</p>
+      <p class="meta">PRD v2 — updated November 15, 2026. Build 2 is a locally working AI-powered workflow. Current evidence is a technical test, not validated phishing-detection accuracy.</p>
 
       <h3>1. Target User &amp; The Job to Be Done</h3>
       <p><strong>Who is this for?</strong> Initially, friends and NYU Stern classmates who make travel reservations or receive unexpected account, delivery, or payment messages. This is a group I can reach directly to test the workflow. <strong> </strong></p>
@@ -197,18 +197,20 @@
       <h3>2. Scope &amp; Explicit Non-Goals</h3>
       <ul>
         <li><strong>Core workflow:</strong> Paste a suspicious message, analyze it, and receive a clear explanation of risk indicators and a recommended next step.</li>
-        <li><strong>Build 1 implementation:</strong> A browser-based prototype with simple rule-based checks for urgency, requests for sensitive information, links, and some brand/domain mismatches.</li>
-        <li><strong>Planned improvements:</strong> Evaluate whether an AI model and safer URL/domain metadata checks make the explanations more useful without increasing false confidence.</li>
+        <li><strong>Build 1 implementation:</strong> Browser-only JavaScript rules for urgency, sensitive data requests, links, and possible domain inconsistencies.</li>
+        <li><strong>Build 2 implementation:</strong> A local Python web server makes a real OpenRouter API request and returns a structured risk level, up to eight indicators, a summary, and an independent verification recommendation. The browser presents the answer; the local server handles the API key.</li>
+        <li><strong>Planned improvements:</strong> Test against benign and scam-like messages, track unsupported claims and false positives, and explore domain metadata checks only with appropriate privacy and security safeguards.</li>
         <li><strong>Out of Scope #1:</strong> Automatic reading or monitoring of iMessage, WhatsApp, or private inboxes.</li>
         <li><strong>Out of Scope #2:</strong> Opening suspicious links or running them in a live detonation/sandbox environment during this six-week project.</li>
         <li><strong>Out of Scope #3:</strong> Automatically blocking or quarantining messages, or promising definitive scam detection.</li>
       </ul>
 
-      <h3>3. How It Works Under the Hood &amp; Riskiest Assumption (Week 2+)</h3>
-      <p><strong>Riskiest assumption:</strong> People will find an explainable risk assessment useful enough to check a suspicious message before clicking, and the tool can provide that assessment without misleading users when signs are incomplete or benign.</p>
-      <p><strong>Current architecture:</strong> Pasted message → browser-side JavaScript rules → list of indicators + suggested verification step. The Build 1 prototype does not send data to an AI model, contact external URLs, or sandbox links.</p>
-      <p><strong>Potential next version:</strong> Pasted message → structured risk analysis using an AI model and carefully selected URL/domain signals → concise explanation with uncertainty and safe next steps. Any external lookups would need privacy and security safeguards.</p>
-      <p><strong>Early success criteria (to validate):</strong> A user can understand the output without cybersecurity expertise, finish a review in one sitting, and identify the independent verification step. Track false alarms and missed red flags rather than relying on a single "safe" score.</p>
+      <h3>3. Biggest Risk, Build 2 Test &amp; Architecture</h3>
+      <p><strong>Biggest product risk:</strong> The AI may produce plausible but inaccurate phishing indicators, creating false alarms or false confidence. One real test correctly flagged the booking-cancellation pressure but also described a greeting as generic despite a personalized salutation. This demonstrates that a coherent explanation is not necessarily an accurate explanation.</p>
+      <p><strong>How Build 2 tests the risk:</strong> A complete real-input workflow now works and returns explanations rather than just a score. This establishes technical feasibility and exposes a concrete incorrect claim. It does <em>not</em> yet measure sensitivity, specificity, or reliability across a test set. Those are next-step evaluation goals.</p>
+      <p><strong>How the app works:</strong> User pastes a message into <code>docs/prototype.html</code> on <code>127.0.0.1:8000</code> → browser POSTs to <code>/api/analyze</code> → local Python <code>server.py</code> validates input and calls OpenRouter via HTTPS → free model returns structured JSON → server checks response fields → browser displays risk signals, uncertainty, recommended action, token usage and API cost if available. The OpenRouter API key is read from an ignored local <code>.env</code> file and is never sent to the browser. Messages are sent to OpenRouter for processing; the server does not fetch or open links.</p>
+      <p><strong>Product analytics:</strong> PostHog tracks pageviews, clicks, and session replay on both the published Product Page and local app. The local app also sends <code>analysis_started</code>, <code>analysis_completed</code>, and <code>analysis_failed</code> events. A November 15 test confirmed activity from both <code>github.io</code> and <code>127.0.0.1</code>; a session replay was also verified. Avoid capturing raw message content as analytics properties and confirm input masking during replay review.</p>
+      <p><strong>Success criteria for further testing:</strong> A target user can complete an analysis and understand the independent verification step; responses should avoid unsupported claims, perform sensibly on benign examples, and stay within an affordable latency and per-run cost. Compare false positives and missed red flags across a small test set before making reliability claims.</p>
 
       <h3>4. Unit Economics &amp; Analytics Snapshot (Updated Weekly)</h3>
       <div class="grid-2">
@@ -217,19 +219,19 @@
           <div class="stat-value">TBD</div>
         </div>
         <div class="stat-box">
-          <div class="stat-label">Current Cost Per Prototype Run</div>
-          <div class="stat-value">$0 in API calls</div>
+          <div class="stat-label">Observed API Cost Per AI Run</div>
+          <div class="stat-value">$0.000000</div>
         </div>
         <div class="stat-box">
-          <div class="stat-label">User Evidence (Analytics from Build 2)</div>
-          <div class="stat-value">Not yet measured</div>
+          <div class="stat-label">Build 2 Analytics Evidence</div>
+          <div class="stat-value">Events + replay verified</div>
         </div>
         <div class="stat-box">
           <div class="stat-label">Sponsor Call (Week 6)</div>
           <div class="stat-value">TBD</div>
         </div>
       </div>
-      <p class="meta">Build 1 cost per run is zero in external API usage because the prototype only runs local browser rules. Any coding-agent subscriptions, token expenses, and time spent should be reported using actual records.</p>
+      <p class="meta"><strong>Observed inference unit economics:</strong> One successful OpenRouter free-route analysis used 1,610 total tokens and returned API cost $0.000000 (model: <code>dots-studio/dots-3-note-preview:free</code>). This is one sample, not a guaranteed future rate; free-model availability and limits may change. GitHub Pages and the local Python backend have no separately billed hosting in this build. Engineering hours, subscription allocation, and total historical project spend require confirmation against actual records.</p>
     </section>
 
     <!-- WEEKLY BUILD LOG (Updated at least twice a week via Git commits) -->
@@ -252,11 +254,16 @@
       </div>
 
       <div class="log-entry">
-        <h3>Build 2 · Smallest Local Version & PostHog (Due Nov 16)</h3>
+        <h3>Build 2 · Smallest Local Version &amp; PostHog (Due Nov 16)</h3>
+        <p class="meta">Progress through November 15, 2026; update with any further work and actual time before submission.</p>
         <ul>
-          <li><strong>What shipped:</strong> [Local working slice, PostHog verified on this page and the local app, PRD v2, and local setup in AGENTS.md]</li>
-          <li><strong>What broke / changed in PRD:</strong> [Fill in]</li>
-          <li><strong>Cost & time this week:</strong> $[0.00] · [0] hours</li>
+          <li><strong>What shipped:</strong> An AI-powered local CyberEye demo. A Python standard-library server on localhost accepts pasted messages, calls OpenRouter, validates structured JSON and returns explainable risk findings and safe verification steps. Added configuration via untracked <code>.env</code>, <a href="https://github.com/building-with-ai-f26/sbp9868-project-slug/blob/main/AGENTS.md">AGENTS.md setup documentation</a>, automated backend tests, and a GitHub Actions test workflow.</li>
+          <li><strong>Live proof:</strong> A successful free-model request returned elevated risk with four indicators and an independently verifying recommendation. The returned model was <code>dots-studio/dots-3-note-preview:free</code>, 1,610 tokens, and $0.000000 in API usage. A separate live test is required to demonstrate end-to-end functionality on the classroom laptop.</li>
+          <li><strong>Analytics:</strong> PostHog events on both the public Product Page and local app were verified: pageviews, a Product Page click, local analysis button clicks, <code>analysis_started</code>, <code>analysis_completed</code>, and previous <code>analysis_failed</code> events. Session replay was confirmed working. Raw message content should not be recorded in analytics, and replay masking should be inspected.</li>
+          <li><strong>Problems and fixes:</strong> Encountered a stray duplicate JavaScript block, a broken cost-display string that prevented clicks, free-model latency, Python HTTPS certificate verification failure, and empty or badly formatted model responses. Fixed the markup/JavaScript, installed Python certificates locally, expanded the output budget, and improved JSON parsing and error reporting. Automated tests now pass.</li>
+          <li><strong>Lesson / PRD change:</strong> A real model call proves the workflow can run, but not that results are accurate. One response incorrectly labeled a personalized greeting as generic. Build 3 should prioritize realistic benign and malicious examples, unsupported-claim checks, and more transparent uncertainty. No inbox integrations, URL detonation, or automatic blocking are included.</li>
+          <li><strong>Cost &amp; time:</strong> Confirmed successful free-model inference: <strong>$0.000000 for 1,610 tokens</strong>. Public GitHub Pages / locally run server: no separately billed hosting for this build. <strong>Actual hours: [record before submission]</strong>. <strong>Other agent/subscription expenditure and cumulative cost: [confirm actual amount]</strong>.</li>
+          <li><strong>Evidence remaining:</strong> Add a redacted screenshot of the actual AI result to the Product Showcase (not the illustrative Build 1 preview), and capture the requested PostHog events screenshot for Icerynk. A separate meaningful commit on November 16 is still required to meet the two-day rule for this build.</li>
         </ul>
       </div>
 
