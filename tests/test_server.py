@@ -2,6 +2,8 @@
 import json
 import os
 import sys
+import socket
+import ssl
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -46,6 +48,19 @@ class CyberEyeTests(unittest.TestCase):
             with self.assertRaises(server.AnalysisError) as caught:
                 server.analyze_message("Verify my account now")
         self.assertEqual(caught.exception.status, 503)
+
+    def test_ssl_error_identified(self):
+        err = server.classify_connection_error(ssl.SSLCertVerificationError("certificate verify failed"))
+        self.assertEqual(err.status, 502)
+        self.assertIn("certificate", err.message.lower())
+
+    def test_dns_error_identified(self):
+        err = server.classify_connection_error(socket.gaierror("nodename nor servname provided"))
+        self.assertIn("DNS", err.message)
+
+    def test_timeout_error_identified(self):
+        err = server.classify_connection_error(TimeoutError("timed out"))
+        self.assertEqual(err.status, 504)
 
     def test_default_free_model(self):
         self.assertEqual(server.DEFAULT_MODEL, "openrouter/free")
