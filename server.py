@@ -9,6 +9,7 @@ No third-party Python packages are required.
 import json
 import os
 import socket
+import ssl
 from pathlib import Path
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib import error, request
@@ -125,6 +126,36 @@ def parse_model_response(data):
         raise AnalysisError(502, "AI response could not be interpreted. Please retry.")
 
 
+def classify_connection_error(reason):
+    """Give actionable, non-sensitive network errors without exposing API keys."""
+    description = str(reason).lower()
+    if isinstance(reason, (TimeoutError, socket.timeout)) or "timed out" in description:
+        return AnalysisError(
+            504,
+            f"OpenRouter did not respond within {OPENROUTER_TIMEOUT_SECONDS} seconds. Free models can be slow or overloaded."
+        )
+    if isinstance(reason, ssl.SSLCertVerificationError) or "certificate_verify_failed" in description:
+        return AnalysisError(
+            502,
+            "Python cannot verify OpenRouter's HTTPS certificate. On macOS with python.org Python, run "
+            "'Install Certificates.command' in your Applications/Python 3.x folder, then restart CyberEye."
+        )
+    if isinstance(reason, socket.gaierror) or "nodename nor servname provided" in description:
+        return AnalysisError(
+            502,
+            "Python cannot resolve openrouter.ai (DNS lookup failed). Check your DNS, VPN, or network connection."
+        )
+    if isinstance(reason, ConnectionRefusedError):
+        return AnalysisError(
+            502,
+            "The connection to OpenRouter was refused. Check firewall or proxy settings."
+        )
+    return AnalysisError(
+        502,
+        f"Python could not connect to OpenRouter ({type(reason).__name__}). Check your network, VPN, or proxy."
+    )
+
+
 def analyze_message(message):
     message = validate_message(message)
     key = os.getenv("OPENROUTER_API_KEY", "")
@@ -181,9 +212,7 @@ def analyze_message(message):
     except (TimeoutError, socket.timeout):
         raise AnalysisError(504, f"OpenRouter did not respond within {OPENROUTER_TIMEOUT_SECONDS} seconds. Free models can be slow or overloaded.")
     except error.URLError as exc:
-        if isinstance(exc.reason, (TimeoutError, socket.timeout)) or "timed out" in str(exc.reason).lower():
-            raise AnalysisError(504, f"OpenRouter did not respond within {OPENROUTER_TIMEOUT_SECONDS} seconds. Free models can be slow or overloaded.")
-        raise AnalysisError(502, "Cannot connect to OpenRouter. Check your internet connection, VPN or firewall.")
+        raise classify_connection_error(exc.reason) from exc
     except (ValueError, UnicodeDecodeError):
         raise AnalysisError(502, "OpenRouter returned an invalid response.")
     return parse_model_response(data)
