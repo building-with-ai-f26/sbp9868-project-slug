@@ -71,6 +71,7 @@
         <div class="result-head"><h2>Preliminary risk signals</h2><span class="risk" id="risk">Not analyzed</span></div>
         <p class="hint" id="summary">Click Analyze to request an AI-generated assessment. The output is advisory and may be wrong.</p>
         <div id="findings"></div>
+        <p class="hint" id="usage-info" aria-live="polite"></p>
         <div class="safe"><strong>Recommended next step:</strong> <span id="advice">Verify requests inside the official app or website you open yourself, rather than using message links.</span></div>
       </section>
     </div>
@@ -82,6 +83,7 @@
     const risk = $('risk');
     const summary = $('summary');
     const findings = $('findings');
+    const usageInfo = $('usage-info');
     const advice = $('advice');
 
     function addFinding(title, explanation) {
@@ -107,6 +109,7 @@
       risk.textContent = 'Processing';
       summary.textContent = 'Requesting an assessment from OpenRouter…';
       findings.replaceChildren();
+      usageInfo.textContent = '';
       window.posthog?.capture('analysis_started', { source: 'local_app' });
       try {
         const response = await fetch('/api/analyze', {
@@ -125,6 +128,40 @@
         for (const item of data.indicators || []) addFinding(item.title, item.explanation);
         if (!data.indicators?.length) addFinding('Limited visible evidence', 'No specific indicators were identified from the pasted text.');
         advice.textContent = data.next_step;
+        const cost = data.usage?.cost_usd;
+        const tokens = data.usage?.prompt_tokens;
+        const outputTokens = data.usage?.completion_tokens;
+        usageInfo.textContent = 'Model: ' + (data.model || 'Unknown')
+          + (typeof cost === 'number' ? ' · API cost: 
+        // Only non-sensitive metadata goes to PostHog.
+        window.posthog?.capture('analysis_completed', {
+          source: 'local_app',
+          risk_level: data.risk_level,
+          model: data.model,
+          indicator_count: (data.indicators || []).length,
+          cost_usd: typeof data.usage?.cost_usd === 'number' ? data.usage.cost_usd : undefined
+        });
+      } catch (err) {
+        risk.className = 'risk high';
+        risk.textContent = 'Error';
+        summary.textContent = err.message;
+        addFinding('No AI assessment was completed', 'Check your local server, OpenRouter API key, model access, and internet connection.');
+        advice.textContent = 'Until analysis succeeds, verify any unexpected request through the official app or a trusted contact method.';
+        window.posthog?.capture('analysis_failed', { source: 'local_app' });
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Analyze message';
+      }
+    }
+    button.addEventListener('click', analyze);
+    if (window.location.hostname.endsWith('github.io')) {
+      summary.textContent = 'This public preview is static. Run python3 server.py and open localhost:8000/prototype.html for live AI analysis.';
+    }
+  </script>
+</body>
+</html>
+ + cost.toFixed(6) : ' · API cost: check OpenRouter activity')
+          + (typeof tokens === 'number' && typeof outputTokens === 'number' ? ' · Tokens: ' + (tokens + outputTokens) : '');
         // Only non-sensitive metadata goes to PostHog.
         window.posthog?.capture('analysis_completed', {
           source: 'local_app',
