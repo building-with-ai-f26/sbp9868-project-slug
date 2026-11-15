@@ -47,6 +47,12 @@ class CyberEyeTests(unittest.TestCase):
                 server.analyze_message("Verify my account now")
         self.assertEqual(caught.exception.status, 503)
 
+    def test_default_free_model(self):
+        self.assertEqual(server.DEFAULT_MODEL, "openrouter/free")
+
+    def test_timeout_configuration(self):
+        self.assertGreaterEqual(server.OPENROUTER_TIMEOUT_SECONDS, 60)
+
     def test_prompt_injection_is_not_a_system_instruction(self):
         self.assertIn("UNTRUSTED DATA", server.SYSTEM_PROMPT)
         self.assertIn("Do not open links", server.SYSTEM_PROMPT)
