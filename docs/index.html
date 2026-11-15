@@ -138,6 +138,21 @@
       color: var(--muted);
     }
   </style>
+  <!-- PostHog public project token (not a secret); pasted messages are never sent as event properties. -->
+  <script id="cybereye-posthog" src="https://us-assets.i.posthog.com/static/array.js"></script>
+  <script>
+    if (window.posthog && typeof window.posthog.init === 'function') {
+      posthog.init('phc_CHDVAN2jZzozFYuEfVqDwPRCj7EKpABYqocM5SskatfZ', {
+        api_host: 'https://us.i.posthog.com',
+        capture_pageview: true,
+        autocapture: true,
+        disable_session_recording: false,
+        session_recording: { maskAllInputs: true },
+        defaults: '2026-08-30'
+      });
+      posthog.register({ cybereye_surface: 'product_page' });
+    }
+  </script>
 </head>
 <body>
   <div class="container">
