@@ -132,7 +132,8 @@
         const tokens = data.usage?.prompt_tokens;
         const outputTokens = data.usage?.completion_tokens;
         usageInfo.textContent = 'Model: ' + (data.model || 'Unknown')
-          + (typeof cost === 'number' ? ' · API cost: 
+          + (typeof cost === 'number' ? ' · API cost: $' + cost.toFixed(6) : ' · API cost: check OpenRouter activity')
+          + (typeof tokens === 'number' && typeof outputTokens === 'number' ? ' · Tokens: ' + (tokens + outputTokens) : '');
         // Only non-sensitive metadata goes to PostHog.
         window.posthog?.capture('analysis_completed', {
           source: 'local_app',
