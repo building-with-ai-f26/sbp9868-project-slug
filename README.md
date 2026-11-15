@@ -1,10 +1,10 @@
-# [Project Name]
+# CyberEye
 
-> **One-line pitch:** [Who is this for, and what job does it do for them?]
+> **One-line pitch:** An AI-assisted message analyzer that helps people recognize phishing warning signs and verify suspicious requests before clicking.
 
-- **Builder:** [Your Name] (`@github-handle`)
+- **Builder:** `@sbp9868`
 - **Pod:** [Pod Name / Number]
-- **Product Page & Living PRD:** [Add your GitHub Pages URL]
+- **Product Page & Living PRD:** https://building-with-ai-f26.github.io/sbp9868-project-slug/
 - **App:** runs locally through Week 4; add a cloud URL in Build 5.
 
 ## Start here: Build 1
@@ -33,13 +33,19 @@ Create your PostHog account in Week 1. Install it on the Product Page and local 
 
 [Icerynk](https://www.icerynk.com/c/fa26-tech-gb-2160-dm2-f2/content) holds the assignment instructions and submissions.
 
-## Local setup
+## Local setup (Build 2: AI backend)
 
-Clone **your own repository** and ask your coding agent to document the exact install and run commands here and in `AGENTS.md`.
+Requires Python 3.9+ and an OpenRouter API key. No third-party Python packages are required.
 
-```bash
-git clone https://github.com/building-with-ai-f26/<your-repo-name>.git
-cd <your-repo-name>
-```
+1. Clone this repo or open your existing clone in Terminal.
+2. Run `cp .env.example .env` in the project folder.
+3. Open `.env` and replace the placeholder `OPENROUTER_API_KEY` with your real key. Never commit `.env`.
+4. Run `python3 server.py`.
+5. Open http://127.0.0.1:8000/prototype.html and click **Analyze message**.
+6. Run tests: `python3 -m unittest discover -s tests -v`. GitHub Actions also checks them.
 
-If your app needs API keys, use a local environment file such as `.env`. Keep private keys out of source code, browser code, screenshots, and commits. The template ignores `.env`; `.env.example` contains placeholders only.
+The GitHub Pages site is a static preview: live AI analysis works **only on localhost**. Keep the local Terminal running during pod testing. No suspicious links are opened.
+
+The backend returns risk indicators, uncertainty, suggested independent verification and token/cost usage when supplied by OpenRouter. PostHog has been added to the Product Page and prototype for pageviews, button interaction events and replay, but actual event delivery must be verified by visiting the pages.
+
+Never paste API keys, credentials, or private messages into repository files, screenshots, or analytics.
