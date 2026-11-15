@@ -8,6 +8,7 @@ No third-party Python packages are required.
 """
 import json
 import os
+import socket
 from pathlib import Path
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib import error, request
@@ -16,7 +17,8 @@ from urllib.parse import urlsplit
 ROOT = Path(__file__).resolve().parent
 DOCS = ROOT / "docs"
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEFAULT_MODEL = "openai/gpt-4.1-mini"
+DEFAULT_MODEL = "openrouter/free"
+OPENROUTER_TIMEOUT_SECONDS = 75
 MAX_MESSAGE_LENGTH = 5000
 MAX_REQUEST_BYTES = 12000
 
@@ -161,17 +163,27 @@ def analyze_message(message):
         method="POST"
     )
     try:
-        with request.urlopen(req, timeout=35) as response:
+        with request.urlopen(req, timeout=OPENROUTER_TIMEOUT_SECONDS) as response:
             raw = response.read(200000)
         data = json.loads(raw.decode("utf-8"))
     except error.HTTPError as exc:
         if exc.code in (401, 403):
-            raise AnalysisError(502, "OpenRouter authentication failed. Check your key.")
+            raise AnalysisError(502, "OpenRouter rejected the API key or blocked this request. Check your key and account.")
+        if exc.code == 402:
+            raise AnalysisError(502, "OpenRouter requires credits for this model. In .env, set OPENROUTER_MODEL=openrouter/free.")
+        if exc.code == 408:
+            raise AnalysisError(504, "OpenRouter timed out upstream. Its free model may be busy; try again later.")
         if exc.code == 429:
-            raise AnalysisError(503, "OpenRouter rate limit reached. Try again later.")
-        raise AnalysisError(502, "OpenRouter returned an error. Check model and account.")
-    except (error.URLError, TimeoutError):
-        raise AnalysisError(504, "AI request timed out or the network is unavailable.")
+            raise AnalysisError(503, "OpenRouter free-model rate limit reached. Wait before retrying.")
+        if exc.code == 503:
+            raise AnalysisError(503, "OpenRouter has no available provider matching this model and JSON-output requirements. Try again later.")
+        raise AnalysisError(502, f"OpenRouter returned HTTP {exc.code}. Check your model and provider access.")
+    except (TimeoutError, socket.timeout):
+        raise AnalysisError(504, f"OpenRouter did not respond within {OPENROUTER_TIMEOUT_SECONDS} seconds. Free models can be slow or overloaded.")
+    except error.URLError as exc:
+        if isinstance(exc.reason, (TimeoutError, socket.timeout)) or "timed out" in str(exc.reason).lower():
+            raise AnalysisError(504, f"OpenRouter did not respond within {OPENROUTER_TIMEOUT_SECONDS} seconds. Free models can be slow or overloaded.")
+        raise AnalysisError(502, "Cannot connect to OpenRouter. Check your internet connection, VPN or firewall.")
     except (ValueError, UnicodeDecodeError):
         raise AnalysisError(502, "OpenRouter returned an invalid response.")
     return parse_model_response(data)
@@ -182,6 +194,13 @@ class CyberEyeHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(DOCS), **kwargs)
 
     def do_GET(self):
+        if urlsplit(self.path).path == "/api/status":
+            key = os.getenv("OPENROUTER_API_KEY", "")
+            return self.send_json(200, {
+                "api_key_configured": bool(key and "replace-with-your-key" not in key),
+                "model": os.getenv("OPENROUTER_MODEL", DEFAULT_MODEL),
+                "timeout_seconds": OPENROUTER_TIMEOUT_SECONDS
+            })
         if self.path == "/":
             self.send_response(302)
             self.send_header("Location", "/prototype.html")
