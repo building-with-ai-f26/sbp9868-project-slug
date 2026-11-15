@@ -7,11 +7,11 @@ CyberEye is an explainable, cautious assistant for NYU Stern classmates and othe
 - Public product page: docs/index.html, hosted on GitHub Pages, containing the living PRD and build log.
 - Local app: docs/prototype.html, served through server.py.
 - Backend: server.py, Python standard library; POST /api/analyze.
-- AI: OpenRouter chat completions; OPENROUTER_MODEL selects model (default openai/gpt-4.1-mini).
+- AI: OpenRouter chat completions; OPENROUTER_MODEL selects model (default openrouter/free).
 - Credentials: OPENROUTER_API_KEY stays in local .env, never in GitHub or browser JavaScript.
 - Flow: browser sends pasted text to localhost -> Python server sends it to OpenRouter -> validates structured JSON -> browser displays a summary, findings, and independent verification steps.
 - Persistence: none in local server. Message content is sent to OpenRouter.
-- Analytics: PostHog events can capture non-sensitive metadata; never send pasted messages, prompts, or outputs to analytics.
+- Analytics: PostHog on the public Product Page and local app captures pageviews, clicks, custom analysis-started/completed/failed events, and session replay. Only non-sensitive model, risk, count and cost metadata belong in custom analytics events; never send pasted messages, prompts, or outputs to analytics. Configure replay input masking and verify it before allowing outside testers.
 - GitHub Pages is static: AI functionality only works from localhost with server.py running.
 
 ## Setup and run locally
@@ -36,7 +36,7 @@ The server binds to 127.0.0.1 only. No third-party Python packages are required.
 5. Never open or request suspicious URLs.
 6. Never imply that absence of indicators proves safety.
 7. If a change fails twice, stop and summarize before trying again.
-8. Do not claim a live AI test when only mocked tests have passed.
+8. Do not claim a live AI test when only mocked tests have passed. A real OpenRouter inference succeeded November 15 using dots-studio/dots-3-note-preview:free; this is one successful example, not a reliability evaluation.
 
 ## Known limitations
-No automated access to iMessage, WhatsApp, or email. No URL sandbox, domain reputation integration, automatic blocking, authentication, or persistent history. Provider request latency and inference costs vary. Session replay needs careful privacy configuration before rollout.
+No automated access to iMessage, WhatsApp, or email. No URL sandbox, domain reputation integration, automatic blocking, authentication, or persistent history. Provider request latency and inference costs vary. Session replay was verified operational on November 15; inspect recorded sessions to verify that message inputs are masked before outside testing. Free model responses can be incomplete or inaccurate, so do not claim definitive phishing detection.
