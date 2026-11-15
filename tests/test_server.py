@@ -51,7 +51,7 @@ class CyberEyeTests(unittest.TestCase):
             "next_step": "Verify directly in the official app."
         })
         response = {
-            "choices": [{"finish_reason": "stop", "message": {"content": "```json\\n" + content + "\\n```"}}]
+            "choices": [{"finish_reason": "stop", "message": {"content": "```json\n" + content + "\n```"}}]
         }
         self.assertEqual(server.parse_model_response(response)["risk_level"], "high")
 
