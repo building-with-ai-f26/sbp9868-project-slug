@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CyberEye — Build 1 Prototype</title>
+  <title>CyberEye — Build 2 AI Analysis</title>
   <style>
     :root { color-scheme:light; font-family:Inter, -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
     * { box-sizing:border-box; }
@@ -24,6 +24,7 @@
     textarea:focus { outline:2px solid #58a8ff; border-color:transparent; }
     button { cursor:pointer; background:#1359e6; color:white; border:0; border-radius:9px; font-weight:700; font-size:14px; padding:13px 18px; margin-top:14px; width:100%; }
     button:hover { background:#0d48bc; }
+    button:disabled { opacity:.65; cursor:wait; }
     .result-head { display:flex; justify-content:space-between; align-items:center; gap:10px; }
     .risk { border-radius:20px; font-size:12px; padding:7px 12px; font-weight:800; background:#fff1e7; color:#9a4400; }
     .risk.low { background:#e5f5ee; color:#186c45; }
@@ -38,54 +39,97 @@
   </style>
 </head>
 <body>
-  <header><div class="brand">Cyber<span>Eye</span></div><div class="flag">BUILD 1 · INTERACTIVE DEMO</div></header>
+  <header><div class="brand">Cyber<span>Eye</span></div><div class="flag">BUILD 2 · AI-POWERED LOCAL APP</div></header>
   <main>
     <h1>Spot suspicious messages before you click.</h1>
     <p class="intro">Paste a text, email, or chat message. CyberEye checks for common scam indicators and explains what to verify next.</p>
     <div class="panels">
       <section class="panel">
         <div class="step">01 / Input</div><h2>Check a message</h2>
-        <p class="hint">Use a sample message or paste your own. This demo never opens links or sends message content to a server.</p>
+        <p class="hint">Use a sample message or paste your own. Messages are sent to OpenRouter through your local server for AI analysis. Do not paste sensitive personal information. Links are never opened.</p>
         <label for="message" class="step">Message to review</label>
         <textarea id="message" spellcheck="false">Important: Your Airbnb reservation requires immediate payment verification. Visit https://verify-airbnb-stay.example to confirm your credit card or your booking will be cancelled.</textarea>
         <button id="analyze">Analyze message</button>
       </section>
       <section class="panel" aria-live="polite">
         <div class="step">02 / Explanation</div>
-        <div class="result-head"><h2>Preliminary risk signals</h2><span class="risk" id="risk">Analyzing</span></div>
-        <p class="hint" id="summary">This is a preliminary indicator check, not proof that a message is fraudulent.</p>
+        <div class="result-head"><h2>Preliminary risk signals</h2><span class="risk" id="risk">Not analyzed</span></div>
+        <p class="hint" id="summary">Click Analyze to request an AI-generated assessment. The output is advisory and may be wrong.</p>
         <div id="findings"></div>
         <div class="safe"><strong>Recommended next step:</strong> <span id="advice">Verify requests inside the official app or website you open yourself, rather than using message links.</span></div>
       </section>
     </div>
-    <p class="foot">Build 1 proof of concept. This browser-only version uses simple rule-based checks, not an AI model, link sandbox, malicious-URL reputation feed, or automated messaging access. A low score does not mean a message is safe.</p>
+    <p class="foot">Build 2 local demonstration. AI analysis requires running server.py and an OpenRouter API key. This tool does not open links, verify senders, sandbox URLs, or access messaging accounts. Low risk does not mean safe.</p>
   </main>
   <script>
-    const $=id=>document.getElementById(id);
-    function analyze() {
-      const value=$('message').value.trim();
-      const tests=[
-        [/urgent|immediate|right away|today|within \d+ hours|cancelled|suspend|expire/i,'Pressure to act quickly','The message uses urgency or a threatened consequence.'],
-        [/credit card|payment|bank|billing|password|verification|verify your|confirm your/i,'Sensitive information requested','The sender asks for a payment, account verification, or credentials.'],
-        [/https?:\/\/[^\s]+/i,'Link included','Check the destination independently; a link alone does not establish malicious intent.']
-      ];
-      const results=tests.filter(t=>t[0].test(value));
-      if (/airbnb/i.test(value)&&/https?:\/\/[^\s]*airbnb\.com(\/|[?#\s]|$)/i.test(value)===false&&/https?:\/\//i.test(value)) {
-        results.push([null,'Brand and linked domain may differ','The message mentions Airbnb, but its URL does not appear to use airbnb.com.']);
-      }
-      const score=results.length;
-      const level=score>=3?'high':score>=1?'medium':'low';
-      $('risk').textContent=level==='high'?'Multiple signals':level==='medium'?'Review recommended':'No obvious signals';
-      $('risk').className='risk '+level;
-      $('summary').textContent=!value?'Enter a message to review.':score?score+' possible warning sign'+(score>1?'s':'')+' found. These are heuristics, not a verdict.':'No matching indicators found. That does not confirm the message is safe.';
-      $('findings').replaceChildren();
-      if(!results.length) {
-        const e=document.createElement('div');e.className='finding';e.textContent='No common warning phrases identified in this sample.';$('findings').appendChild(e);
-      } else results.forEach(x=>{const d=document.createElement('div');d.className='finding';const t=document.createElement('strong');t.textContent=x[1];const s=document.createElement('span');s.textContent=x[2];d.append(t,s);$('findings').appendChild(d);});
-      $('advice').textContent=score?'Do not use the included link. Open the official service directly and check your account for an authentic request.':'Check the sender and independently verify unexpected requests before acting.';
+    const $ = id => document.getElementById(id);
+    const button = $('analyze');
+    const risk = $('risk');
+    const summary = $('summary');
+    const findings = $('findings');
+    const advice = $('advice');
+
+    function addFinding(title, explanation) {
+      const box = document.createElement('div');
+      box.className = 'finding';
+      const heading = document.createElement('strong');
+      heading.textContent = title;
+      const detail = document.createElement('span');
+      detail.textContent = explanation;
+      box.append(heading, detail);
+      findings.appendChild(box);
     }
-    $('analyze').addEventListener('click',analyze);
-    analyze();
+
+    async function analyze() {
+      const message = $('message').value.trim();
+      if (!message) {
+        summary.textContent = 'Paste a message before analyzing it.';
+        return;
+      }
+      button.disabled = true;
+      button.textContent = 'Analyzing with AI…';
+      risk.className = 'risk';
+      risk.textContent = 'Processing';
+      summary.textContent = 'Requesting an assessment from OpenRouter…';
+      findings.replaceChildren();
+      window.posthog?.capture('analysis_started', { source: 'local_app' });
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+        let data;
+        try { data = await response.json(); }
+        catch { throw new Error('The server returned a non-JSON response. Run this app with python3 server.py.'); }
+        if (!response.ok) throw new Error(data.error || 'Analysis failed.');
+        const names = { high: 'Elevated risk', medium: 'Caution advised', low: 'Few visible signals', unclear: 'Insufficient evidence' };
+        risk.className = 'risk ' + (data.risk_level === 'unclear' ? 'medium' : data.risk_level);
+        risk.textContent = names[data.risk_level] || 'Review needed';
+        summary.textContent = data.summary;
+        for (const item of data.indicators || []) addFinding(item.title, item.explanation);
+        if (!data.indicators?.length) addFinding('Limited visible evidence', 'No specific indicators were identified from the pasted text.');
+        advice.textContent = data.next_step;
+        // Only non-sensitive metadata goes to PostHog.
+        window.posthog?.capture('analysis_completed', {
+          source: 'local_app',
+          risk_level: data.risk_level,
+          model: data.model,
+          indicator_count: (data.indicators || []).length
+        });
+      } catch (err) {
+        risk.className = 'risk high';
+        risk.textContent = 'Error';
+        summary.textContent = err.message;
+        addFinding('No AI assessment was completed', 'Check your local server, OpenRouter API key, model access, and internet connection.');
+        advice.textContent = 'Until analysis succeeds, verify any unexpected request through the official app or a trusted contact method.';
+        window.posthog?.capture('analysis_failed', { source: 'local_app' });
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Analyze message';
+      }
+    }
+    button.addEventListener('click', analyze);
   </script>
 </body>
 </html>
