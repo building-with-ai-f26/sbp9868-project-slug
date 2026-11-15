@@ -43,6 +43,43 @@ class CyberEyeTests(unittest.TestCase):
             })
         self.assertEqual(caught.exception.status, 502)
 
+    def test_markdown_fenced_json_is_accepted(self):
+        content = json.dumps({
+            "risk_level": "high",
+            "summary": "Urgent message asking for credentials.",
+            "indicators": [{"title": "Urgency", "explanation": "It threatens cancellation."}],
+            "next_step": "Verify directly in the official app."
+        })
+        response = {
+            "choices": [{"finish_reason": "stop", "message": {"content": "```json\\n" + content + "\\n```"}}]
+        }
+        self.assertEqual(server.parse_model_response(response)["risk_level"], "high")
+
+    def test_text_content_parts_are_accepted(self):
+        content = json.dumps({
+            "risk_level": "unclear", "summary": "Insufficient information.",
+            "indicators": [], "next_step": "Verify through an independent channel."
+        })
+        response = {"choices": [{"message": {"content": [{"type": "text", "text": content}]}}]}
+        self.assertEqual(server.parse_model_response(response)["risk_level"], "unclear")
+
+    def test_output_limit_explained(self):
+        with self.assertRaises(server.AnalysisError) as caught:
+            server.parse_model_response({
+                "choices": [{"finish_reason": "length", "message": {"content": ""}}]
+            })
+        self.assertIn("tokens", caught.exception.message)
+
+    def test_empty_output_explained(self):
+        with self.assertRaises(server.AnalysisError) as caught:
+            server.parse_model_response({"choices": [{"message": {"content": ""}}]})
+        self.assertIn("empty", caught.exception.message)
+
+    def test_invalid_json_is_not_presented_as_safe(self):
+        with self.assertRaises(server.AnalysisError) as caught:
+            server.parse_model_response({"choices": [{"message": {"content": "Looks safe!"}}]})
+        self.assertIn("not valid JSON", caught.exception.message)
+
     def test_missing_api_key_is_not_mocked_as_ai(self):
         with patch.dict(os.environ, {"OPENROUTER_API_KEY": ""}):
             with self.assertRaises(server.AnalysisError) as caught:
