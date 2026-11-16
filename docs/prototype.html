@@ -68,13 +68,13 @@
         <div class="step">01 / Input</div><h2>Check a message</h2>
         <p class="hint">Paste a message or extract text from a screenshot (PNG/JPG/WebP/BMP, up to 10 MB). Screenshot text is extracted on your device. Review the text before analyzing. Only the submitted text goes to OpenRouter, not the image. Do not include sensitive personal information. Links are never opened.</p>
         <div class="upload-row">
-          <button type="button" id="upload-screenshot" class="upload-button">Upload screenshot</button>
-          <input type="file" id="screenshot-file" accept="image/png,image/jpeg,image/webp,image/bmp" hidden aria-label="Select screenshot to extract text">
+          <button type="button" id="upload-screenshot" class="upload-button" data-ph-no-capture>Upload screenshot</button>
+          <input type="file" id="screenshot-file" data-ph-no-capture accept="image/png,image/jpeg,image/webp,image/bmp" hidden aria-label="Select screenshot to extract text">
           <span class="hint" style="margin:0">Or paste the message below</span>
         </div>
         <p id="ocr-status" class="hint" role="status" aria-live="polite">Screenshots are read locally using OCR. Check the extracted text before analyzing.</p>
         <label for="message" class="step">Message to review</label>
-        <textarea id="message" spellcheck="false">Important: Your Airbnb reservation requires immediate payment verification. Visit https://verify-airbnb-stay.example to confirm your credit card or your booking will be cancelled.</textarea>
+        <textarea id="message" class="ph-no-capture" spellcheck="false">Important: Your Airbnb reservation requires immediate payment verification. Visit https://verify-airbnb-stay.example to confirm your credit card or your booking will be cancelled.</textarea>
         <button id="analyze">Analyze message</button>
       </section>
       <section class="panel" aria-live="polite">
