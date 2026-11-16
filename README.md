@@ -41,10 +41,12 @@ Requires Python 3.9+ and an OpenRouter API key. No third-party Python packages a
 2. Run `cp .env.example .env` in the project folder.
 3. Open `.env` and replace the placeholder `OPENROUTER_API_KEY` with your real key. Never commit `.env`.
 4. Run `python3 server.py`.
-5. Open http://127.0.0.1:8000/prototype.html and click **Analyze message**.
+5. Open http://127.0.0.1:8000/prototype.html. Paste text or click **Upload screenshot** to select an image (PNG, JPEG, WebP, BMP; maximum 10 MB). Screenshot text is extracted in the browser with Tesseract.js, placed in the editable message field, and is not sent to OpenRouter until you click **Analyze message**.
 6. Run tests: `python3 -m unittest discover -s tests -v`. GitHub Actions also checks them.
 
 The GitHub Pages site is a static preview: live AI analysis works **only on localhost**. Keep the local Terminal running during pod testing. No suspicious links are opened.
+
+The first screenshot OCR use downloads the pinned Tesseract.js library, a worker, and English recognition data from CDN servers; an internet connection is needed. OCR can misread text, so review and correct it first. Uploaded image bytes are not sent to OpenRouter or to CyberEye's Python server.
 
 The backend returns risk indicators, uncertainty, suggested independent verification and token/cost usage when supplied by OpenRouter. PostHog has been added to the Product Page and prototype for pageviews, button interaction events and replay, but actual event delivery must be verified by visiting the pages.
 
