@@ -25,6 +25,11 @@
     button { cursor:pointer; background:#1359e6; color:white; border:0; border-radius:9px; font-weight:700; font-size:14px; padding:13px 18px; margin-top:14px; width:100%; }
     button:hover { background:#0d48bc; }
     button:disabled { opacity:.65; cursor:wait; }
+    .upload-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:14px 0 8px; }
+    .upload-button { width:auto; margin:0; padding:10px 16px; color:#1359e6; background:white; border:1px solid #93b1e8; }
+    .upload-button:hover { background:#edf4ff; }
+    .error-text { color:#a32128; }
+    #ocr-status { margin:4px 0 14px; }
     .result-head { display:flex; justify-content:space-between; align-items:center; gap:10px; }
     .risk { border-radius:20px; font-size:12px; padding:7px 12px; font-weight:800; background:#fff1e7; color:#9a4400; }
     .risk.low { background:#e5f5ee; color:#186c45; }
@@ -57,11 +62,17 @@
   <header><div class="brand">Cyber<span>Eye</span></div><div class="flag">BUILD 2 · AI-POWERED LOCAL APP</div></header>
   <main>
     <h1>Spot suspicious messages before you click.</h1>
-    <p class="intro">Paste a text, email, or chat message. CyberEye checks for common scam indicators and explains what to verify next.</p>
+    <p class="intro">Paste a text, email, or chat message—or upload a screenshot. CyberEye checks for scam indicators and explains what to verify next.</p>
     <div class="panels">
       <section class="panel">
         <div class="step">01 / Input</div><h2>Check a message</h2>
-        <p class="hint">Use a sample message or paste your own. Messages are sent to OpenRouter through your local server for AI analysis. Do not paste sensitive personal information. Links are never opened.</p>
+        <p class="hint">Paste a message or extract text from a screenshot (PNG/JPG/WebP/BMP, up to 10 MB). Screenshot text is extracted on your device. Review the text before analyzing. Only the submitted text goes to OpenRouter, not the image. Do not include sensitive personal information. Links are never opened.</p>
+        <div class="upload-row">
+          <button type="button" id="upload-screenshot" class="upload-button">Upload screenshot</button>
+          <input type="file" id="screenshot-file" accept="image/png,image/jpeg,image/webp,image/bmp" hidden aria-label="Select screenshot to extract text">
+          <span class="hint" style="margin:0">Or paste the message below</span>
+        </div>
+        <p id="ocr-status" class="hint" role="status" aria-live="polite">Screenshots are read locally using OCR. Check the extracted text before analyzing.</p>
         <label for="message" class="step">Message to review</label>
         <textarea id="message" spellcheck="false">Important: Your Airbnb reservation requires immediate payment verification. Visit https://verify-airbnb-stay.example to confirm your credit card or your booking will be cancelled.</textarea>
         <button id="analyze">Analyze message</button>
@@ -75,7 +86,7 @@
         <div class="safe"><strong>Recommended next step:</strong> <span id="advice">Verify requests inside the official app or website you open yourself, rather than using message links.</span></div>
       </section>
     </div>
-    <p class="foot">Build 2 local demonstration. AI analysis requires running server.py and an OpenRouter API key. This tool does not open links, verify senders, sandbox URLs, or access messaging accounts. Low risk does not mean safe.</p>
+    <p class="foot">Build 2 local demonstration. Screenshot OCR downloads a browser text-recognition library on first use, but does not upload the image. AI analysis requires running server.py and an OpenRouter API key. This tool does not open links, verify senders, sandbox URLs, or access messaging accounts. Low risk does not mean safe.</p>
   </main>
   <script>
     const $ = id => document.getElementById(id);
@@ -159,5 +170,6 @@
       summary.textContent = 'This public preview is static. Run python3 server.py and open localhost:8000/prototype.html for live AI analysis.';
     }
   </script>
+  <script src="./ocr.js" defer></script>
 </body>
 </html>
