@@ -173,7 +173,7 @@
       <h2>Product Showcase (Prototype / Live App / 2-Min Video)</h2>
       <p>
         <strong>Current Status:</strong> Build 2: AI-powered analysis working locally with a real OpenRouter call. The public GitHub Pages demo remains a static preview; to run the AI workflow, launch <code>python3 server.py</code> locally.<br />
-        <strong>Preview:</strong> <a href="./prototype.html" target="_blank" rel="noopener noreferrer">Open the CyberEye interface</a> &nbsp;·&nbsp; <strong>Run instructions:</strong> <a href="https://github.com/building-with-ai-f26/sbp9868-project-slug#local-setup-build-2-ai-backend" target="_blank" rel="noopener noreferrer">GitHub README</a>
+        <strong>Live app:</strong> <a href="https://cybereye-sbp9868.onrender.com" target="_blank" rel="noopener noreferrer">Open CyberEye</a> &nbsp;·&nbsp; <strong>Run instructions:</strong> <a href="https://github.com/building-with-ai-f26/sbp9868-project-slug#local-setup-build-2-ai-backend" target="_blank" rel="noopener noreferrer">GitHub README</a>
       </p>
       <figure style="margin:20px 0 12px">
         <a href="./images/cybereye-build2-screenshot-redacted.webp" target="_blank" rel="noopener noreferrer" aria-label="View the full CyberEye Build 2 AI analysis screenshot">
@@ -181,14 +181,14 @@
         </a>
         <figcaption class="meta" style="margin-top:8px">Build 2 evidence — actual successful local OpenRouter response, November 15, 2026. Booking-message and URL details redacted before public posting. The model produced four findings and classified the message as elevated risk; one finding about a generic greeting was inaccurate, illustrating why CyberEye must be tested for false positives.</figcaption>
       </figure>
-      <p class="meta">The linked public <a href="./prototype.html" target="_blank" rel="noopener noreferrer">interface preview</a> is static. Live AI analysis runs locally by launching <code>python3 server.py</code>. PostHog pageviews, clicks, and session replay were verified on both the public Product Page and local application.</p>
+      <p class="meta">Open the live app to analyze a message or upload a screenshot from your phone.</p>
     </section>
 
     <!-- LIVING PRD (Updated every week!) -->
     <section id="prd">
       <h2>Living PRD (Product Requirements Document)</h2>
       <p class="meta">PRD v3 · November 22, 2026</p>
-      <p>Classmates should be able to review a message on their phones. GitHub Pages hosts this product page. The deployment target for analysis is one free Render Python service. Screenshots stay in the browser for OCR, and only submitted text goes to OpenRouter. CyberEye has no accounts, database, or file bucket. The server limits analysis attempts and keeps the provider key in its environment. Replay masks inputs and blocks the findings panel.</p>
+      <p>Classmates should be able to review a message on their phones. GitHub Pages hosts this product page. One free Render Python service hosts the app and its AI route. Screenshots stay in the browser for OCR, and only submitted text goes to OpenRouter. CyberEye has no accounts, database, or file bucket. The server limits analysis attempts and keeps the provider key in its environment. Replay masks inputs and blocks the findings panel.</p>
 
       <h3>1. Target User &amp; The Job to Be Done</h3>
       <p><strong>Who is this for?</strong> Initially, friends and NYU Stern classmates who make travel reservations or receive unexpected account, delivery, or payment messages. This is a group I can reach directly to test the workflow. <strong> </strong></p>
@@ -210,7 +210,7 @@
       <h3>3. Biggest Risk, Build 2 Test &amp; Architecture</h3>
       <p><strong>Biggest product risk:</strong> The AI may produce plausible but inaccurate phishing indicators, creating false alarms or false confidence. One real test correctly flagged the booking-cancellation pressure but also described a greeting as generic despite a personalized salutation. This demonstrates that a coherent explanation is not necessarily an accurate explanation.</p>
       <p><strong>How Build 2 tests the risk:</strong> A complete real-input workflow now works and returns explanations rather than just a score. This establishes technical feasibility and exposes a concrete incorrect claim. It does <em>not</em> yet measure sensitivity, specificity, or reliability across a test set. Those are next-step evaluation goals.</p>
-      <p><strong>How the app works:</strong> User pastes a message into <code>docs/prototype.html</code> on <code>127.0.0.1:8000</code> → browser POSTs to <code>/api/analyze</code> → local Python <code>server.py</code> validates input and calls OpenRouter via HTTPS → free model returns structured JSON → server checks response fields → browser displays risk signals, uncertainty, recommended action, token usage and API cost if available. The OpenRouter API key is read from an ignored local <code>.env</code> file and is never sent to the browser. Messages are sent to OpenRouter for processing; the server does not fetch or open links.</p>
+      <p><strong>How the app works:</strong> User pastes a message into <code>docs/prototype.html</code> on Render → browser POSTs to <code>/api/analyze</code> → Python <code>server.py</code> validates input and calls OpenRouter via HTTPS → free model returns structured JSON → server checks response fields → browser displays risk signals, uncertainty, recommended action, token usage and API cost if available. The OpenRouter API key is read from an ignored local <code>.env</code> file and is never sent to the browser. Messages are sent to OpenRouter for processing; the server does not fetch or open links.</p>
       <p><strong>Product analytics:</strong> PostHog tracks pageviews, clicks, and session replay on both the published Product Page and local app. The local app also sends <code>analysis_started</code>, <code>analysis_completed</code>, and <code>analysis_failed</code> events. A November 15 test confirmed activity from both <code>github.io</code> and <code>127.0.0.1</code>; a session replay was also verified. Avoid capturing raw message content as analytics properties and confirm input masking during replay review.</p>
       <p><strong>Success criteria for further testing:</strong> A target user can complete an analysis and understand the independent verification step; responses should avoid unsupported claims, perform sensibly on benign examples, and stay within an affordable latency and per-run cost. Compare false positives and missed red flags across a small test set before making reliability claims.</p>
 
@@ -274,9 +274,9 @@
       <div class="log-entry">
         <h3>Build 3 · Build.exe: The Core Workflow (Due Nov 23)</h3>
         <ul>
-          <li><strong>What shipped:</strong> Prepared the Render deployment, added analysis request limits, and blocked the findings panel in session replay. Public service verification is pending.</li>
+          <li><strong>What shipped:</strong> Deployed the Python app to Render. Both text and screenshot workflows returned real AI assessments. The live security test returned HTTP 429 on attempts 6–30. <a href="./images/CyberEye-live-429.png">View the security test result</a>.</li>
           <li><strong>What broke / changed in PRD:</strong> The static preview could not call the Python route. The deployment now serves the app and API together. Input masking alone left generated findings visible in replay.</li>
-          <li><strong>Cost &amp; time this week:</strong> No inference billed by the automated tests. Total spend and student hours await confirmation.</li>
+          <li><strong>Cost &amp; time this week:</strong> Both live AI checks displayed $0.000000; the rate-limit test used empty requests. Total spend and student hours await confirmation.</li>
         </ul>
       </div>
 
