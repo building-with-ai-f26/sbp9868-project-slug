@@ -10,11 +10,11 @@
 | Input and output | Existing tests cover message length, instruction separation, malformed provider output and upstream errors. Browser code renders model text as text nodes. The app does not fetch links from submissions. |
 | Analytics | Input masking was configured. Generated findings could repeat message content in replay. Blocked the findings panel and OCR status in replay and excluded them from autocapture. PostHog recorded OCR and analysis events and a replay for the synthetic production session. Visual inspection of masking is pending. |
 | Dependencies | Python backend uses the standard library. Browser loads Tesseract.js 7.0.0 and PostHog externally. Added npm audit for the OCR package and dependency tree in Actions. Local registry lookup was blocked. [GitHub Actions run 45074286918](https://github.com/building-with-ai-f26/sbp9868-project-slug/actions/runs/45074286918) passed the OCR audit at the high-severity threshold, backend tests, and JavaScript syntax check. The externally served PostHog script is outside npm audit coverage. |
-| Spending | Blueprint selects the free model router. Owner must confirm the actual monthly provider cap. |
+| Spending | Blueprint selects the free model router. On November 22, 2026, the owner confirmed saving a $1 monthly OpenRouter workspace budget. |
 | Production safeguards | AGENTS.md requires owner approval for destructive operations, credentials, permissions and spend. |
 
 ## Production verification
 
-On November 22, 2026, the [Render app](https://cybereye-sbp9868.onrender.com) returned an AI assessment for a synthetic payment-verification message. In a 390 × 844 browser viewport, OCR extracted “MEET AT NOON” from a synthetic screenshot and the app returned a second assessment. Both displayed an inference cost of $0.000000. The test used browser phone emulation. A classmate’s physical-phone check, visual replay masking review, and confirmation of the provider’s monthly hard cap remain open.
+On November 22, 2026, the [Render app](https://cybereye-sbp9868.onrender.com) returned an AI assessment for a synthetic payment-verification message. In a 390 × 844 browser viewport, OCR extracted “MEET AT NOON” from a synthetic screenshot and the app returned a second assessment. Both displayed an inference cost of $0.000000. The test used browser phone emulation. A classmate’s physical-phone check and visual replay masking review remain open.
 
 The limiter test used empty JSON to exercise validation and throttling without using model credits. The linked screenshot is a browser capture of the live-test report generated from the recorded HTTP responses.
