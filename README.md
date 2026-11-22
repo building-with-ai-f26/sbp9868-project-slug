@@ -5,7 +5,7 @@
 - **Builder:** `@sbp9868`
 - **Pod:** [Pod Name / Number]
 - **Product Page & Living PRD:** https://building-with-ai-f26.github.io/sbp9868-project-slug/
-- **App:** Python app with a free Render deployment blueprint. See [Shipping](./AGENTS.md#shipping) and the [Build 3 audit](./SECURITY.md) for deployment status.
+- **App:** [Open CyberEye on Render](https://cybereye-sbp9868.onrender.com). See [Shipping](./AGENTS.md#shipping) and the [Build 3 audit](./SECURITY.md) for deployment status.
 
 ## Start here: Build 1
 
