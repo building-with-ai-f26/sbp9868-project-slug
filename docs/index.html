@@ -187,7 +187,8 @@
     <!-- LIVING PRD (Updated every week!) -->
     <section id="prd">
       <h2>Living PRD (Product Requirements Document)</h2>
-      <p class="meta">PRD v2 — updated November 15, 2026. Build 2 is a locally working AI-powered workflow. Current evidence is a technical test, not validated phishing-detection accuracy.</p>
+      <p class="meta">PRD v3 · November 22, 2026</p>
+      <p>Classmates should be able to review a message on their phones. GitHub Pages hosts this product page. The deployment target for analysis is one free Render Python service. Screenshots stay in the browser for OCR, and only submitted text goes to OpenRouter. CyberEye has no accounts, database, or file bucket. The server limits analysis attempts and keeps the provider key in its environment. Replay masks inputs and blocks the findings panel.</p>
 
       <h3>1. Target User &amp; The Job to Be Done</h3>
       <p><strong>Who is this for?</strong> Initially, friends and NYU Stern classmates who make travel reservations or receive unexpected account, delivery, or payment messages. This is a group I can reach directly to test the workflow. <strong> </strong></p>
@@ -273,9 +274,9 @@
       <div class="log-entry">
         <h3>Build 3 · Build.exe: The Core Workflow (Due Nov 23)</h3>
         <ul>
-          <li><strong>What shipped:</strong> [End-to-end workflow working with real inputs + PostHog funnel events]</li>
-          <li><strong>What broke / changed in PRD:</strong> [Fill in]</li>
-          <li><strong>Cost & time this week:</strong> $[0.00] · [0] hours</li>
+          <li><strong>What shipped:</strong> Prepared the Render deployment, added analysis request limits, and blocked the findings panel in session replay. Public service verification is pending.</li>
+          <li><strong>What broke / changed in PRD:</strong> The static preview could not call the Python route. The deployment now serves the app and API together. Input masking alone left generated findings visible in replay.</li>
+          <li><strong>Cost &amp; time this week:</strong> No inference billed by the automated tests. Total spend and student hours await confirmation.</li>
         </ul>
       </div>
 

@@ -25,3 +25,8 @@ jobs:
         run: node --check docs/ocr.js
       - name: Run isolated backend tests (no API key required)
         run: python -m unittest discover -s tests -v
+      - name: Audit the pinned browser OCR package and its dependencies
+        working-directory: ${{ runner.temp }}
+        run: |
+          npm install --package-lock-only --ignore-scripts tesseract.js@7.0.0
+          npm audit --audit-level=high
