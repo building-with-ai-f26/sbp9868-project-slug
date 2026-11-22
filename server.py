@@ -6,6 +6,10 @@ Open: http://127.0.0.1:8000/prototype.html
 Requires: OPENROUTER_API_KEY in a local .env file or environment.
 No third-party Python packages are required.
 """
+from collections import deque
+from ipaddress import ip_address
+from threading import Lock
+from time import monotonic
 import json
 import os
 import socket
@@ -266,6 +270,23 @@ def analyze_message(message):
     return parse_model_response(data)
 
 
+# Single-instance deployment. The global ceiling also bounds memory.
+recent_requests = deque()
+rate_lock = Lock()
+WINDOW_SECONDS = 600
+
+
+def allow_analysis(visitor):
+    with rate_lock:
+        now = monotonic()
+        while recent_requests and recent_requests[0][0] <= now - WINDOW_SECONDS:
+            recent_requests.popleft()
+        if len(recent_requests) >= 24 or sum(key == visitor for _, key in recent_requests) >= 5:
+            return False
+        recent_requests.append((now, visitor))
+        return True
+
+
 class CyberEyeHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(DOCS), **kwargs)
@@ -288,6 +309,8 @@ class CyberEyeHandler(SimpleHTTPRequestHandler):
     def send_json(self, code, payload):
         body = json.dumps(payload).encode("utf-8")
         self.send_response(code)
+        if code == 429:
+            self.send_header("Retry-After", str(WINDOW_SECONDS))
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
@@ -297,6 +320,14 @@ class CyberEyeHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
         if urlsplit(self.path).path != "/api/analyze":
             return self.send_json(404, {"error": "Endpoint not found."})
+        visitor = self.client_address[0]
+        if os.getenv("RENDER") == "true":
+            try:
+                visitor = str(ip_address(self.headers.get("CF-Connecting-IP", "")))
+            except ValueError:
+                pass
+        if not allow_analysis(visitor):
+            return self.send_json(429, {"error": "Analysis request limit reached. Try again in 10 minutes."})
         if self.headers.get("Content-Type", "").split(";")[0].strip() != "application/json":
             return self.send_json(415, {"error": "Send application/json."})
         try:
@@ -321,8 +352,9 @@ class CyberEyeHandler(SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     load_local_env()
     port = int(os.getenv("PORT", "8000"))
-    server = ThreadingHTTPServer(("127.0.0.1", port), CyberEyeHandler)
-    print(f"CyberEye running at http://127.0.0.1:{port}/prototype.html")
+    host = "0.0.0.0" if os.getenv("RENDER") == "true" else "127.0.0.1"
+    server = ThreadingHTTPServer((host, port), CyberEyeHandler)
+    print(f"CyberEye running at http://{host}:{port}/prototype.html")
     print("Stop with Ctrl+C. Message content is sent to OpenRouter on Analyze.")
     try:
         server.serve_forever()

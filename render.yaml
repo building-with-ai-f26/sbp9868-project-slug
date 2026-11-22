@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: cybereye-sbp9868
+    runtime: python
+    plan: free
+    buildCommand: python -m unittest discover -s tests -v
+    startCommand: python server.py
+    healthCheckPath: /api/status
+    envVars:
+      - key: OPENROUTER_MODEL
+        value: openrouter/free
+      - key: OPENROUTER_API_KEY
+        sync: false
