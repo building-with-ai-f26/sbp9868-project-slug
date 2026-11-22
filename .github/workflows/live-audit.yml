@@ -1,0 +1,65 @@
+name: Verify live CyberEye rate limit
+on:
+  workflow_dispatch:
+  push:
+    branches: [verify-render-build3]
+    paths: ['.github/workflows/live-audit.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Inspect public assets and exercise the production route
+        shell: python
+        run: |
+          import html, json, re, time
+          from pathlib import Path
+          from urllib.request import Request, urlopen
+          from urllib.error import HTTPError
+          from urllib.parse import urljoin
+          from html.parser import HTMLParser
+          base = 'https://cybereye-sbp9868.onrender.com'
+          class Scripts(HTMLParser):
+              def handle_starttag(self, tag, attrs):
+                  src = dict(attrs).get('src')
+                  if tag == 'script' and src:
+                      assets.add(urljoin(base + '/prototype.html', src))
+          assets = {base + '/prototype.html', base + '/index.html', base + '/ocr.js'}
+          checked = set()
+          while assets - checked:
+              url = sorted(assets - checked)[0]
+              with urlopen(url, timeout=90) as response:
+                  source = response.read().decode()
+              if url.endswith('.html'):
+                  Scripts().feed(source)
+              if url.endswith('/ocr.js'):
+                  assets.update(re.findall(r"https://cdn\.jsdelivr\.net/[^'\s]+\.js", source))
+              if re.search(r'sb_secret_|service_role|sk-or-|sk-ant-|sk-proj-|sk_live_', source):
+                  raise RuntimeError('Review key-prefix match in ' + url)
+              checked.add(url)
+              print('Scanned', url)
+          url = base + '/api/analyze'
+          statuses = []
+          for n in range(30):
+              req = Request(url, data=b'{}', headers={'Content-Type':'application/json'})
+              try:
+                  with urlopen(req, timeout=30) as resp:
+                      statuses.append(resp.status)
+              except HTTPError as error:
+                  statuses.append(error.code)
+                  last = error.read().decode()
+                  retry = error.headers.get('Retry-After')
+          print('HTTP status sequence:', statuses)
+          assert 429 in statuses and statuses[-1] == 429 and all(s in (400,429) for s in statuses)
+          detail = json.loads(last)['error']
+          print('Final response:', detail, 'Retry-After:', retry)
+          stamp = time.strftime('%Y-%m-%d %H:%M UTC',time.gmtime())
+          Path('evidence.html').write_text(f'''<meta charset="utf-8"><style>body{{font:24px system-ui;margin:65px;color:#17243b}}h1{{font-size:42px}}code{{font-size:21px}}h2{{color:#a32b22}}</style><p>CyberEye · Live HTTP test · {stamp}</p><h1>Production rate-limit test</h1><code>POST {url}</code><h2>HTTP 429 · Too Many Requests</h2><p>30 sequential requests with an empty JSON object.</p><p>HTTP 400: {statuses.count(400)} &nbsp; · &nbsp; HTTP 429: {statuses.count(429)}</p><p>Final response: {html.escape(detail)}</p><p>Retry-After: {html.escape(str(retry))} seconds</p>''')
+      - name: Capture the observed production result
+        run: google-chrome --headless --no-sandbox --disable-gpu --window-size=1200,650 --screenshot="$PWD/CyberEye-live-429.png" "file://$PWD/evidence.html"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CyberEye-live-429
+          path: CyberEye-live-429.png
