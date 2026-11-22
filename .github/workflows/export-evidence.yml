@@ -1,0 +1,20 @@
+name: Retrieve Build 3 evidence
+on:
+  push:
+    branches: [verify-render-build3]
+    paths: ['.github/workflows/export-evidence.yml']
+permissions:
+  actions: read
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: CyberEye-live-429
+          run-id: 45075418946
+          github-token: ${{ github.token }}
+      - name: Export screenshot
+        run: |
+          sha256sum CyberEye-live-429.png
+          base64 -w 76 CyberEye-live-429.png
